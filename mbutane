@@ -1,0 +1,112 @@
+#!/usr/bin/env python
+""" mbutane
+
+mbutane is a wrapper for Butane that merges multiple human-readable
+Butane Configs and translates them into machine-readable Ignition Configs.
+
+Copyright (C) 2021  Daniel Rudolf <https://www.daniel-rudolf.de>
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, version 3 of the License only.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
+
+SPDX-License-Identifier: GPL-3.0-only
+License-Filename: LICENSE
+"""
+
+import mbutane
+import argparse, errno, os, pathlib, re, subprocess, sys
+
+try:
+    argumentParser = argparse.ArgumentParser(usage="%(prog)s [OPTION]... [PATH]", add_help=False,
+        description="mbutane is a wrapper for Butane that merges multiple human-readable " +
+            "Butane Configs and translates them into machine-readable Ignition Configs. ")
+    argumentParser.epilog = ("Please report bugs using GitHub at <https://github.com/PhrozenByte/mbutane>. " +
+        "Besides, you will find general help and information about mbutane there.")
+
+    argumentGroup = argumentParser.add_argument_group("Arguments")
+    argumentGroup.add_argument("path", metavar="PATH", nargs='?',
+        help="Path to read Butane Configs from. Expects a 'config.bu' file as main Butane config there and " +
+            "writes the transformed Ignition Configs to 'config.ign'. Defaults to the current working dir.")
+
+    helpOptions = argumentParser.add_argument_group("Help options")
+    helpOptions.add_argument("--help", dest="help", action="store_true",
+        help="Display this help message and exit")
+    helpOptions.add_argument("--version", dest="version", action="store_true",
+        help="Output version information and exit")
+
+    args = argumentParser.parse_args()
+
+    if args.help:
+        argumentParser.print_help()
+        sys.exit(0)
+
+    if args.version:
+        print("mbutane {}".format(mbutane.__version__))
+        print(mbutane.__copyright__)
+        print("")
+        print("License GPLv3: GNU GPL version 3 only <http://gnu.org/licenses/gpl.html>.")
+        print("This is free software: you are free to change and redistribute it.")
+        print("There is NO WARRANTY, to the extent permitted by law.")
+        print("")
+        print("Written by Daniel Rudolf <http://www.daniel-rudolf.de/>")
+        print("See also: <https://github.com/PhrozenByte/mbutane>")
+        sys.exit(0)
+
+    if args.path and args.path != '.':
+        basePath = pathlib.Path(args.path)
+        if not basePath.exists():
+            print("Invalid base path {!r}: No such file or directory".format(str(basePath)), file=sys.stderr)
+            sys.exit(1)
+        if not basePath.is_dir():
+            print("Invalid base path {!r}: Not a directory".format(str(basePath)), file=sys.stderr)
+            sys.exit(1)
+
+        os.chdir(str(basePath))
+
+    butaneConfigFile = pathlib.Path('config.bu')
+    if not butaneConfigFile.exists():
+        print("Missing required {!r}: No such file or directory".format(str(butaneConfigFile)), file=sys.stderr)
+        sys.exit(1)
+    if not butaneConfigFile.is_file():
+        print("Missing required {!r}: Not a file".format(str(butaneConfigFile)), file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        butaneCheckProcess = subprocess.run(['butane', '--version'],
+                                            stdout=subprocess.PIPE, check=True, encoding='utf-8')
+        if not re.match(r"^Butane v[0-9]+\.[0-9]+", butaneCheckProcess.stdout):
+            print("Unable to run `butane`: `butane --version` returned an unexpected output", file=sys.stderr)
+            sys.exit(1)
+    except FileNotFoundError:
+        print("Unable to run `butane`: No such executable", file=sys.stderr)
+        sys.exit(1)
+    except subprocess.CalledProcessError:
+        print("Unable to run `butane`: `butane --version` failed with a non-zero exit status", file=sys.stderr)
+        sys.exit(1)
+
+    with mbutane.ButaneConfig() as butaneConfig:
+        butaneProcess = subprocess.Popen(['butane', '--pretty', '--strict', '--files-dir', '.'],
+                                         stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                         encoding='utf-8')
+
+        try:
+            ignitionConfig, _ = butaneProcess.communicate(input=butaneConfig.yaml, timeout=300)
+        except TimeoutExpired:
+            butaneProcess.kill()
+            raise ChildProcessError(errno.ECHILD, 'Execution of `butane` timed out')
+
+        if butaneProcess.returncode != 0:
+            raise ChildProcessError(errno.ECHILD, "Execution of `butane` failed with code {}".format(butaneProcess.returncode))
+
+        ignitionConfigFile = pathlib.Path('config.ign')
+        ignitionConfigFile.write_text(ignitionConfig)
+except KeyboardInterrupt:
+    sys.exit(130)
