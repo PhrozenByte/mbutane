@@ -56,5 +56,14 @@ python -m pip install -r requirements.txt
 
 `mbutane` was written for Python 3.6, but should work with any later Python 3 version. If it doesn't, please file a bug report.
 
+License & Copyright
+-------------------
+
+Copyright (C) 2021  Daniel Rudolf <https://www.daniel-rudolf.de/>
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3 of the License only.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the [GNU General Public License](LICENSE) for more details.
+
 [Butane]: https://coreos.github.io/butane/
 [Ignition]: https://coreos.github.io/ignition/
