@@ -329,7 +329,7 @@ class ButaneStorageConfig(UserDict):
         self._storagePaths = self._basePath.glob('**/*')
         self._storagePaths = sorted(self._storagePaths, key=lambda storagePath: str(storagePath))
 
-        self._storageConfigs = self._basePath.glob('**/config.bu')
+        self._storageConfigs = self._basePath.glob('**/' + self._configFileName)
 
     def close(self):
         self._storagePaths = None
