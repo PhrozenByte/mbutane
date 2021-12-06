@@ -36,6 +36,10 @@ try:
         help="Path to read Butane Configs from. Expects a 'config.bu' file as main Butane config there and " +
             "writes the transformed Ignition Configs to 'config.ign'. Defaults to the current working dir.")
 
+    applicationOptions = argumentParser.add_argument_group("Application options")
+    applicationOptions.add_argument("-v", "--verbose", dest="verbose", action="store_true",
+        help="Print merged Butane Config before translation")
+
     helpOptions = argumentParser.add_argument_group("Help options")
     helpOptions.add_argument("--help", dest="help", action="store_true",
         help="Display this help message and exit")
@@ -93,6 +97,9 @@ try:
         sys.exit(1)
 
     with mbutane.ButaneConfig() as butaneConfig:
+        if args.verbose:
+            print(butaneConfig.yaml)
+
         butaneProcess = subprocess.Popen(['butane', '--pretty', '--strict', '--files-dir', '.'],
                                          stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                          encoding='utf-8')
