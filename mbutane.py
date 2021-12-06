@@ -23,7 +23,7 @@ License-Filename: LICENSE
 import copy, errno, os, pathlib, yaml
 from collections import OrderedDict, UserDict, Mapping, MutableMapping
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __copyright__ = "Copyright (C) 2021 Daniel Rudolf"
 __license__ = "GPL-3.0-only"
 
