@@ -27,7 +27,7 @@ import pathlib
 import yaml
 from collections import OrderedDict, UserDict, Mapping, MutableMapping
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 __copyright__ = "Copyright (C) 2021-2022 Daniel Rudolf"
 __license__ = "GPL-3.0-only"
 
