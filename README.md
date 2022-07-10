@@ -46,7 +46,7 @@ You can install `mbutane` locally with Python's `setuptools`:
 python setup.py install --user
 ```
 
-`mbutane` is a wrapper for Butane, thus you must also install Butane locally. It expects a `butane` executable in your `$PATH`. You can either use Butane from your package sources, download one of Butane's release binaries, or use a container-based version of Butane. Please refer to [Butane's "Getting Started" docs](https://coreos.github.io/butane/getting-started/#getting-butane) for help.
+`mbutane` is a wrapper for Butane, thus you must also install Butane locally. It either expects a `butane` executable in your `$PATH`, or you must give its path using the `--butane` option. You can either use Butane from your package sources, download one of Butane's release binaries, or use a container-based version of Butane. Please refer to [Butane's "Getting Started" docs](https://coreos.github.io/butane/getting-started/#getting-butane) for help.
 
 Additionally it requires [PyYAML](https://pyyaml.org/) (or any compatible implementation). You can either install PyYAML from your package sources, or use `pip`:
 

@@ -46,6 +46,8 @@ try:
                                     "Defaults to the current working dir.")
 
     applicationOptions = argumentParser.add_argument_group("Application options")
+    applicationOptions.add_argument("--butane", dest="butane", action="store", default="butane",
+                                    help="Path to the `butane` executable")
     applicationOptions.add_argument("-v", "--verbose", dest="verbose", action="store_true",
                                     help="Print merged Butane Config before translation")
 
@@ -93,7 +95,7 @@ try:
         sys.exit(1)
 
     try:
-        butaneCheckProcess = subprocess.run(['butane', '--version'],
+        butaneCheckProcess = subprocess.run([args.butane, '--version'],
                                             stdout=subprocess.PIPE, check=True, encoding='utf-8')
         if not re.match(r"^Butane v\d+\.\d+", butaneCheckProcess.stdout):
             print("Unable to run `butane`: `butane --version` returned an unexpected output", file=sys.stderr)
@@ -109,7 +111,7 @@ try:
         if args.verbose:
             print(butaneConfig.yaml)
 
-        butaneProcess = subprocess.Popen(['butane', '--pretty', '--strict', '--files-dir', '.'],
+        butaneProcess = subprocess.Popen([args.butane, '--pretty', '--strict', '--files-dir', '.'],
                                          stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                          encoding='utf-8')
 
