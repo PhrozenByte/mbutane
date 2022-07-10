@@ -369,6 +369,8 @@ class ButaneStorageConfig(UserDict):
             elif path.is_file():
                 if path.stat().st_size > 0:
                     config['contents'] = {'local': str(path)}
+                if os.access(str(path), os.X_OK):
+                    config['mode'] = '0755'
 
                 self._data['files'].append(config)
             elif path.is_dir():

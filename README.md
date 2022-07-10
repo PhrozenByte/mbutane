@@ -8,11 +8,11 @@ Usage
 
 `mbutane` takes a path to a directory as only argument (defaults to the current working dir) and expects a `config.bu` as main Butane config file there. You can merge additional Butane config files into the resulting Ignition config by adding more `*.bu` files to the optional `config.bu.d` directory.
 
-Optionally you can also create a `src/` directory with any number of file trees to be embedded in the Ignition config. `mbutane` will create entries for any file, directory, and link it finds there (excluding `.gitignore` files), including file contents and link targets. For the main `config.bu` you can use the `src/main/` directory. For any additional Butane config below `config.bu.d`, use a matching directory (e.g. use `src/my-user/` for `config.bu.d/my-user.bu`). File permissions and ownership are not preserved.
+Optionally you can also create a `src/` directory with any number of file trees to be embedded in the Ignition config. `mbutane` will create entries for any file, directory, and link it finds there (excluding `.gitignore` files), including file contents and link targets. For the main `config.bu` you can use the `src/main/` directory. For any additional Butane config below `config.bu.d`, use a matching directory (e.g. use `src/my-user/` for `config.bu.d/my-user.bu`). File permissions and ownership are not preserved, except for executable files, which will receive `rwxr-xr-x` permissions by default.
 
 To specify file permissions, ownership and whether existing files should be overwritten, you can use `subconfig.bu` files anywhere in the file tree. `subconfig.bu` are YAML files with the `files`, `directories`, and `links` mappings. They all expect a list of objects with a `path` pattern (a [`glob` pattern](https://en.wikipedia.org/wiki/Glob_(programming)) relative to the current directory) and optional `user`, `group`, `mode`, and `overwrite` keys matching those of a regular Butane config.
 
-Here's an example of a `subconfig.bu` at `src/my-user/home/my-user/subconfig.bu`. It ensures that all files, directories and links below `/home/my-user` are owned by user `my-user`, that `/home/my-user` itself has permissions `0700` and all files below `/home/my-user/.local/bin` are executable.
+Here's an example of a `subconfig.bu` at `src/my-user/home/my-user/subconfig.bu`. It ensures that all files, directories and links below `/home/my-user` are owned by user `my-user`, that `/home/my-user` itself has permissions `0700` and all files below `/home/my-user/.local/bin` are executable (this would not have been necessary if the source files had been executable already).
 
 ```yaml
 directories:
