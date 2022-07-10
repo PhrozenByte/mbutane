@@ -20,12 +20,17 @@ SPDX-License-Identifier: GPL-3.0-only
 License-Filename: LICENSE
 """
 
-import copy, errno, os, pathlib, yaml
+import copy
+import errno
+import os
+import pathlib
+import yaml
 from collections import OrderedDict, UserDict, Mapping, MutableMapping
 
 __version__ = "0.0.2"
 __copyright__ = "Copyright (C) 2021 Daniel Rudolf"
 __license__ = "GPL-3.0-only"
+
 
 class YamlLoader(yaml.SafeLoader):
     def __init__(self, *args, **kwargs):
@@ -36,6 +41,7 @@ class YamlLoader(yaml.SafeLoader):
     def construct_yaml_map(self, node):
         self.flatten_mapping(node)
         return OrderedDict(self.construct_pairs(node))
+
 
 class YamlDumper(yaml.SafeDumper):
     def __init__(self, *args, **kwargs):
@@ -55,6 +61,7 @@ class YamlDumper(yaml.SafeDumper):
         if '\n' in data:
             return self.represent_scalar('tag:yaml.org,2002:str', data, style='|')
         return super().represent_str(data)
+
 
 class YamlFile(UserDict):
     _path = None
@@ -127,6 +134,7 @@ class YamlFile(UserDict):
         options['default_flow_style'] = bool(options.get('default_flow_style', False))
         return yaml.dump(self.data, Dumper=YamlDumper, **options)
 
+
 class ButaneConfigFile(YamlFile):
     _storage = None
 
@@ -171,6 +179,7 @@ class ButaneConfigFile(YamlFile):
             data.extend(other)
         else:
             raise ValueError()
+
 
 class ButaneConfig(ButaneConfigFile):
     _mergeConfigs = None
@@ -257,6 +266,7 @@ class ButaneConfig(ButaneConfigFile):
                     knownPaths[path['path']]['append'].extend(appendContents)
 
         return uniquePaths
+
 
 class ButaneStorageConfig(UserDict):
     _basePath = None
@@ -358,7 +368,7 @@ class ButaneStorageConfig(UserDict):
                 self._data['links'].append(config)
             elif path.is_file():
                 if path.stat().st_size > 0:
-                    config['contents'] = {'local': str(path) }
+                    config['contents'] = {'local': str(path)}
 
                 self._data['files'].append(config)
             elif path.is_dir():

@@ -21,30 +21,39 @@ SPDX-License-Identifier: GPL-3.0-only
 License-Filename: LICENSE
 """
 
+import argparse
+import errno
+import os
+import pathlib
+import re
+import subprocess
+import sys
+
 import mbutane
-import argparse, errno, os, pathlib, re, subprocess, sys
 
 try:
     argumentParser = argparse.ArgumentParser(usage="%(prog)s [OPTION]... [PATH]", add_help=False,
-        description="mbutane is a wrapper for Butane that merges multiple human-readable " +
-            "Butane Configs and translates them into machine-readable Ignition Configs. ")
+                                             description="mbutane is a wrapper for Butane that merges multiple " +
+                                                         "human-readable Butane Configs and translates them into " +
+                                                         "machine-readable Ignition Configs. ")
     argumentParser.epilog = ("Please report bugs using GitHub at <https://github.com/PhrozenByte/mbutane>. " +
-        "Besides, you will find general help and information about mbutane there.")
+                             "Besides, you will find general help and information about mbutane there.")
 
     argumentGroup = argumentParser.add_argument_group("Arguments")
     argumentGroup.add_argument("path", metavar="PATH", nargs='?',
-        help="Path to read Butane Configs from. Expects a 'config.bu' file as main Butane config there and " +
-            "writes the transformed Ignition Configs to 'config.ign'. Defaults to the current working dir.")
+                               help="Path to read Butane Configs from. Expects a 'config.bu' file as main Butane " +
+                                    "config there and writes the transformed Ignition Configs to 'config.ign'. " +
+                                    "Defaults to the current working dir.")
 
     applicationOptions = argumentParser.add_argument_group("Application options")
     applicationOptions.add_argument("-v", "--verbose", dest="verbose", action="store_true",
-        help="Print merged Butane Config before translation")
+                                    help="Print merged Butane Config before translation")
 
     helpOptions = argumentParser.add_argument_group("Help options")
     helpOptions.add_argument("--help", dest="help", action="store_true",
-        help="Display this help message and exit")
+                             help="Display this help message and exit")
     helpOptions.add_argument("--version", dest="version", action="store_true",
-        help="Output version information and exit")
+                             help="Output version information and exit")
 
     args = argumentParser.parse_args()
 
@@ -86,7 +95,7 @@ try:
     try:
         butaneCheckProcess = subprocess.run(['butane', '--version'],
                                             stdout=subprocess.PIPE, check=True, encoding='utf-8')
-        if not re.match(r"^Butane v[0-9]+\.[0-9]+", butaneCheckProcess.stdout):
+        if not re.match(r"^Butane v\d+\.\d+", butaneCheckProcess.stdout):
             print("Unable to run `butane`: `butane --version` returned an unexpected output", file=sys.stderr)
             sys.exit(1)
     except FileNotFoundError:
@@ -106,12 +115,13 @@ try:
 
         try:
             ignitionConfig, _ = butaneProcess.communicate(input=butaneConfig.yaml, timeout=300)
-        except TimeoutExpired:
+        except subprocess.TimeoutExpired:
             butaneProcess.kill()
             raise ChildProcessError(errno.ECHILD, 'Execution of `butane` timed out')
 
         if butaneProcess.returncode != 0:
-            raise ChildProcessError(errno.ECHILD, "Execution of `butane` failed with code {}".format(butaneProcess.returncode))
+            errorMessage = "Execution of `butane` failed with code {}".format(butaneProcess.returncode)
+            raise ChildProcessError(errno.ECHILD, errorMessage)
 
         ignitionConfigFile = pathlib.Path('config.ign')
         ignitionConfigFile.write_text(ignitionConfig)
