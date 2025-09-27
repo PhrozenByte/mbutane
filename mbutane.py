@@ -3,7 +3,7 @@
 mbutane is a wrapper for Butane that merges multiple human-readable
 Butane Configs and translates them into machine-readable Ignition Configs.
 
-Copyright (C) 2021-2022  Daniel Rudolf <https://www.daniel-rudolf.de>
+Copyright (C) 2021-2025  Daniel Rudolf <https://www.daniel-rudolf.de>
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -25,7 +25,7 @@ from collections import OrderedDict, UserDict
 from collections.abc import Mapping, MutableMapping
 
 __version__ = importlib.metadata.version("mbutane")
-__copyright__ = "Copyright (C) 2021-2022 Daniel Rudolf"
+__copyright__ = "Copyright (C) 2021-2025 Daniel Rudolf"
 __license__ = "GPL-3.0-only"
 
 
