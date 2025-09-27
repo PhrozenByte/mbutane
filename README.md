@@ -40,21 +40,17 @@ The file tree is merged into `config.bu.d/my-user.bu`, which is later merged int
 Install
 -------
 
-You can install `mbutane` locally with Python's `setuptools`:
+`mbutane` is compatible with [PEP 517](https://peps.python.org/pep-0517/) and [PEP 518](https://peps.python.org/pep-0518/), which means you can (and should) install it with Python's [`pip`](https://pip.pypa.io/en/stable/):
 
 ```shell
-python setup.py install --user
+python -m pip install .
 ```
 
-`mbutane` is a wrapper for Butane, thus you must also install Butane locally. It either expects a `butane` executable in your `$PATH`, or you must give its path using the `--butane` option. You can either use Butane from your package sources, download one of Butane's release binaries, or use a container-based version of Butane. Please refer to [Butane's "Getting Started" docs](https://coreos.github.io/butane/getting-started/#getting-butane) for help.
+`pip` will automatically download and install `mbutane`'s only Python dependency: [PyYAML](https://pyyaml.org/). Alternatively you can install PyYAML or a different, but compatible implementation with your distribution's package manger.
 
-Additionally it requires [PyYAML](https://pyyaml.org/) (or any compatible implementation). You can either install PyYAML from your package sources, or use `pip`:
+However, since `mbutane` is a wrapper for Butane, you must also install Butane locally. `mbutane` expects a `butane` executable in your `$PATH`, or you must give its path using the `--butane` option. You can either use Butane from your package sources, download one of Butane's release binaries, or use a container-based version of Butane. Please refer to [Butane's "Getting Started" docs](https://coreos.github.io/butane/getting-started/#getting-butane) for help.
 
-```shell
-python -m pip install -r requirements.txt
-```
-
-`mbutane` was written for Python 3.6, but should work with any later Python 3 version. If it doesn't, please file a bug report.
+`mbutane` was written for Python 3.8+ and last tested with Python 3.12, but should work with any later Python 3 version. If it doesn't, please file a bug report.
 
 License & Copyright
 -------------------
