@@ -469,7 +469,7 @@ def main():
         try:
             butaneCheckProcess = subprocess.run([args.butane, '--version'],
                                                 stdout=subprocess.PIPE, check=True, encoding='utf-8')
-            if not re.match(r"^Butane v\d+\.\d+", butaneCheckProcess.stdout):
+            if not re.match(r"^Butane v?\d+\.\d+", butaneCheckProcess.stdout):
                 print("Unable to run `butane`: `butane --version` returned an unexpected output", file=sys.stderr)
                 sys.exit(1)
         except FileNotFoundError:
