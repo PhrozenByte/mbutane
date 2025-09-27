@@ -20,17 +20,9 @@ SPDX-License-Identifier: GPL-3.0-only
 License-Filename: LICENSE
 """
 
-import argparse
-import copy
-import errno
-import importlib.metadata
-import os
-import pathlib
-import re
-import subprocess
-import sys
-import yaml
-from collections import OrderedDict, UserDict, Mapping, MutableMapping
+import argparse, copy, errno, importlib.metadata, os, pathlib, re, subprocess, sys, yaml
+from collections import OrderedDict, UserDict
+from collections.abc import Mapping, MutableMapping
 
 __version__ = importlib.metadata.version("mbutane")
 __copyright__ = "Copyright (C) 2021-2022 Daniel Rudolf"
