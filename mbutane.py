@@ -23,6 +23,7 @@ License-Filename: LICENSE
 import argparse
 import copy
 import errno
+import importlib.metadata
 import os
 import pathlib
 import re
@@ -31,7 +32,7 @@ import sys
 import yaml
 from collections import OrderedDict, UserDict, Mapping, MutableMapping
 
-__version__ = "0.0.3"
+__version__ = importlib.metadata.version("mbutane")
 __copyright__ = "Copyright (C) 2021-2022 Daniel Rudolf"
 __license__ = "GPL-3.0-only"
 

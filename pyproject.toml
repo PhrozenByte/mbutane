@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mbutane"
+version = "0.0.3"
+requires-python = ">= 3.8"
+dependencies = [
+    "pyyaml",
+]
+
+description = "MButane is a wrapper for Butane that merges multiple human-readable Butane configs and translates them into a single machine-readable Ignition config."
+readme = "README.md"
+license = "GPL-3.0-only"
+license-files = [ "LICENSE" ]
+authors = [ {name = "Daniel Rudolf", email = "mbutane@daniel-rudolf.de"} ]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: System :: Installation/Setup",
+    "Topic :: System :: Systems Administration",
+]
+
+[project.urls]
+Homepage = "https://github.com/PhrozenByte/mbutane"
+Repository = "https://github.com/PhrozenByte/mbutane.git"
+Issues = "https://github.com/PhrozenByte/mbutane/issues"
+
+[project.scripts]
+mbutane = "mbutane:main"
