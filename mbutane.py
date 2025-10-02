@@ -220,16 +220,23 @@ class ButaneConfig(ButaneConfigFile):
     def load(self):
         super().load()
 
+        self.update({'storage': {'directories': [], 'files': [], 'links': []}})
+
         for mergeConfig in self._mergeConfigs:
             self.update(mergeConfig.data)
 
-        if 'storage' in self._data:
-            if 'directories' in self._data['storage']:
-                self._data['storage']['directories'] = self._uniquePaths(self._data['storage']['directories'])
-            if 'files' in self._data['storage']:
-                self._data['storage']['files'] = self._uniqueFiles(self._data['storage']['files'])
-            if 'links' in self._data['storage']:
-                self._data['storage']['links'] = self._uniquePaths(self._data['storage']['links'])
+        self._data['storage']['directories'] = self._uniquePaths(self._data['storage']['directories'])
+        self._data['storage']['files'] = self._uniqueFiles(self._data['storage']['files'])
+        self._data['storage']['links'] = self._uniquePaths(self._data['storage']['links'])
+
+        if not self._data['storage']['directories']:
+            del self._data['storage']['directories']
+        if not self._data['storage']['files']:
+            del self._data['storage']['files']
+        if not self._data['storage']['links']:
+            del self._data['storage']['links']
+        if not self._data['storage']:
+            del self._data['storage']
 
         return self._data
 
