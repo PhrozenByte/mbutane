@@ -20,7 +20,7 @@ SPDX-License-Identifier: GPL-3.0-only
 License-Filename: LICENSE
 """
 
-import argparse, copy, errno, importlib.metadata, json, os, pathlib, re, subprocess, sys, yaml
+import argparse, copy, datetime, errno, getpass, importlib.metadata, json, os, pathlib, re, socket, subprocess, sys, yaml
 from collections import OrderedDict, UserDict
 from collections.abc import Mapping, MutableMapping
 
@@ -193,16 +193,22 @@ class ButaneConfigFile(YamlFile):
 
 
 class ButaneConfig(ButaneConfigFile):
+    _enableResultFile = True
+
+    _resultFilePath = '/etc/.mbutane-result.json'
     _allowPaths = {'/etc', '/home', '/opt', '/root', '/srv', '/usr/local', '/var'}
     _failPaths = set()
 
     _mergeConfigs = None
 
-    def __init__(self):
+    def __init__(self, enableResultFile=True):
         super().__init__(
             'config.bu',
             'src/main' if os.path.exists('src/main') else None
         )
+
+        self._enableResultFile = enableResultFile
+        self._failPaths = self._failPaths | {self._resultFilePath}
 
     def open(self):
         super().open()
@@ -252,7 +258,26 @@ class ButaneConfig(ButaneConfigFile):
         if not self._data['storage']:
             del self._data['storage']
 
+        if self._enableResultFile:
+            self._loadResultFile()
+
         return self._data
+
+    def _loadResultFile(self):
+        content = JsonData(OrderedDict([
+            ('user', "{}@{}".format(getpass.getuser(), socket.gethostname())),
+            ('date', datetime.datetime.now().astimezone().isoformat(timespec='seconds')),
+        ]))
+
+        config = OrderedDict([
+            ('path', self._resultFilePath),
+            ('contents', {'inline': content.dump()}),
+            ('overwrite', True),
+        ])
+
+        self.update({'storage': {'files': [
+            config
+        ]}})
 
     def _assertValidPath(self, path):
         virtualPath = pathlib.PurePath(path)
@@ -459,6 +484,8 @@ def main():
         applicationOptions = argumentParser.add_argument_group("Application options")
         applicationOptions.add_argument("--butane", dest="butane", action="store", default="butane",
                                         help="Path to the `butane` executable")
+        applicationOptions.add_argument("--no-result-file", dest="resultFile", action="store_false",
+                                        help="Don't create '/etc/.mbutane-result.json'")
         applicationOptions.add_argument("-v", "--verbose", dest="verbose", action="store_true",
                                         help="Print merged Butane Config before translation")
 
@@ -518,7 +545,7 @@ def main():
             print("Unable to run `butane`: `butane --version` failed with a non-zero exit status", file=sys.stderr)
             sys.exit(1)
 
-        with ButaneConfig() as butaneConfig:
+        with ButaneConfig(args.resultFile) as butaneConfig:
             if args.verbose:
                 print(butaneConfig.yaml)
 
