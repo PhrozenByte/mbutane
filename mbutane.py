@@ -179,6 +179,9 @@ class ButaneConfigFile(YamlFile):
 
 
 class ButaneConfig(ButaneConfigFile):
+    _allowPaths = {'/etc', '/home', '/opt', '/root', '/srv', '/usr/local', '/var'}
+    _failPaths = set()
+
     _mergeConfigs = None
 
     def __init__(self):
@@ -230,16 +233,25 @@ class ButaneConfig(ButaneConfigFile):
 
         return self._data
 
+    def _assertValidPath(self, path):
+        virtualPath = pathlib.PurePath(path)
+        if any(virtualPath.match(failPath) for failPath in self._failPaths):
+            raise ValueError("Cannot overwrite system file {!r}".format(path))
+        if not any(virtualPath.is_relative_to(allowPath) for allowPath in self._allowPaths):
+            raise ValueError("Cannot create file {!r} below read-only path".format(path))
+
     def _uniquePaths(self, paths):
         knownPaths = {}
         uniquePaths = []
 
         for path in paths:
+            self._assertValidPath(path['path'])
+
             if path['path'] not in knownPaths:
                 knownPaths[path['path']] = path
                 uniquePaths.append(path)
             elif path != knownPaths[path['path']]:
-                raise ValueError()
+                raise ValueError("Duplicate storage declaration of {!r}".format(path['path']))
 
         return uniquePaths
 
@@ -248,6 +260,8 @@ class ButaneConfig(ButaneConfigFile):
         uniquePaths = []
 
         for path in paths:
+            self._assertValidPath(path['path'])
+
             if path['path'] not in knownPaths:
                 knownPaths[path['path']] = path
                 uniquePaths.append(path)
@@ -272,7 +286,7 @@ class ButaneConfig(ButaneConfigFile):
 class ButaneStorageConfig(UserDict):
     _basePath = None
     _configFileName = None
-    _ignorePaths = {'/*', '/usr/*', '/var/*'}
+    _ignorePaths = {'/etc', '/home', '/opt', '/root', '/srv', '/usr', '/usr/local', '/var'}
 
     _storagePaths = None
     _storageConfigs = None
