@@ -220,9 +220,13 @@ class ButaneConfig(ButaneConfigFile):
         for mergeConfig in self._mergeConfigs:
             self.update(mergeConfig.data)
 
-        self._data['storage']['directories'] = self._uniquePaths(self._data['storage']['directories'])
-        self._data['storage']['files'] = self._uniqueFiles(self._data['storage']['files'])
-        self._data['storage']['links'] = self._uniquePaths(self._data['storage']['links'])
+        if 'storage' in self._data:
+            if 'directories' in self._data['storage']:
+                self._data['storage']['directories'] = self._uniquePaths(self._data['storage']['directories'])
+            if 'files' in self._data['storage']:
+                self._data['storage']['files'] = self._uniqueFiles(self._data['storage']['files'])
+            if 'links' in self._data['storage']:
+                self._data['storage']['links'] = self._uniquePaths(self._data['storage']['links'])
 
         return self._data
 
