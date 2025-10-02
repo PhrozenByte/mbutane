@@ -20,7 +20,7 @@ SPDX-License-Identifier: GPL-3.0-only
 License-Filename: LICENSE
 """
 
-import argparse, copy, errno, importlib.metadata, os, pathlib, re, subprocess, sys, yaml
+import argparse, copy, errno, importlib.metadata, json, os, pathlib, re, subprocess, sys, yaml
 from collections import OrderedDict, UserDict
 from collections.abc import Mapping, MutableMapping
 
@@ -44,10 +44,12 @@ class YamlDumper(yaml.SafeDumper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.add_representer(OrderedDict, self.represent_ordered_dict.__func__)
+        self.add_representer(JsonData, self.represent_ordered_dict.__func__)
+        self.add_representer(YamlData, self.represent_ordered_dict.__func__)
+        self.add_representer(YamlFile, self.represent_ordered_dict.__func__)
         self.add_representer(ButaneConfigFile, self.represent_ordered_dict.__func__)
         self.add_representer(ButaneConfig, self.represent_ordered_dict.__func__)
-        self.add_representer(YamlFile, self.represent_ordered_dict.__func__)
-        self.add_representer(OrderedDict, self.represent_ordered_dict.__func__)
 
         self.add_representer(str, self.represent_str.__func__)
 
@@ -60,7 +62,27 @@ class YamlDumper(yaml.SafeDumper):
         return super().represent_str(data)
 
 
-class YamlFile(UserDict):
+class JsonData(UserDict):
+    @property
+    def json(self):
+        return self.dump()
+
+    def dump(self, **options):
+        options['indent'] = options.get('indent', 2)
+        return json.dumps(self.data, **options)
+
+
+class YamlData(UserDict):
+    @property
+    def yaml(self):
+        return self.dump()
+
+    def dump(self, **options):
+        options['default_flow_style'] = options.get('default_flow_style', False)
+        return yaml.dump(self.data, Dumper=YamlDumper, **options)
+
+
+class YamlFile(YamlData):
     _path = None
 
     _io = None
@@ -86,10 +108,6 @@ class YamlFile(UserDict):
             self.load()
 
         return self._data
-
-    @property
-    def yaml(self):
-        return self.dump()
 
     @property
     def _file(self):
@@ -126,10 +144,6 @@ class YamlFile(UserDict):
     def load(self):
         self._data = yaml.load(self._file, Loader=YamlLoader)
         return self._data
-
-    def dump(self, **options):
-        options['default_flow_style'] = bool(options.get('default_flow_style', False))
-        return yaml.dump(self.data, Dumper=YamlDumper, **options)
 
 
 class ButaneConfigFile(YamlFile):
