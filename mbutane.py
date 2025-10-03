@@ -45,8 +45,8 @@ class YamlDumper(yaml.SafeDumper):
         super().__init__(*args, **kwargs)
 
         self.add_representer(OrderedDict, self.represent_ordered_dict.__func__)
-        self.add_representer(JsonData, self.represent_ordered_dict.__func__)
-        self.add_representer(YamlData, self.represent_ordered_dict.__func__)
+        self.add_representer(JsonData, self.represent_str_dump.__func__)
+        self.add_representer(YamlData, self.represent_str_dump.__func__)
         self.add_representer(YamlFile, self.represent_ordered_dict.__func__)
         self.add_representer(ButaneConfigFile, self.represent_ordered_dict.__func__)
         self.add_representer(ButaneConfig, self.represent_ordered_dict.__func__)
@@ -55,6 +55,9 @@ class YamlDumper(yaml.SafeDumper):
 
     def represent_ordered_dict(self, data):
         return self.represent_mapping('tag:yaml.org,2002:map', data.items())
+
+    def represent_str_dump(self, data):
+        return self.represent_scalar('tag:yaml.org,2002:str', data.dump(), style='|')
 
     def represent_str(self, data):
         if '\n' in data:
@@ -69,7 +72,8 @@ class JsonData(UserDict):
 
     def dump(self, **options):
         options['indent'] = options.get('indent', 2)
-        return json.dumps(self.data, **options)
+        return (json.dumps(self.data, **options)
+            + ("\n" if options['indent'] is not None else ""))
 
 
 class YamlData(UserDict):
